@@ -20,7 +20,7 @@ docker compose up --build -d
 ## Music info API
 * Приложение реализует mock версию music info API.
 * Она может выдать данные только об одной песни: "Roads" группы "Portishead".
-* Чтобы задействовать её нужно в файле .env для переменной MUSICINFO выставить значение "mock".
+* Чтобы задействовать её, нужно в файле .env для переменной MUSICINFO выставить значение "mock".
 * В противном случае нужно выставить адрес реального API в той же переменной.
 
 ## Документация
@@ -37,7 +37,7 @@ cat app.log
 ## Тестирование 
 При тестировании изнутри контейнера необходимо будет установить в него curl:
 ```bash
-docker exec -it --user=root <имя контейнера> /bin/sh
+docker exec -it --user=root app /bin/sh
 ```
 ```bash
 apk --no-cache add curl
