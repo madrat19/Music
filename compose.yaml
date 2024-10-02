@@ -1,0 +1,39 @@
+services:
+  server:
+    build:
+      context: .
+      target: final
+    container_name: app
+    ports:
+      - 8080:8080
+
+
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres
+    container_name: ${PGHOST}
+    restart: always
+    user: ${PGUSER}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+       POSTGRES_USER: ${PGUSER}
+       POSTGRES_DB: ${DBNAME}
+       POSTGRES_PASSWORD: ${PGPASSWORD}
+    ports:
+      - "${PORT}:5432"
+
+    expose:
+      - 5432
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  db-data:
+  
+    
+
