@@ -55,5 +55,26 @@ curl -X GET http://localhost:8080/songs
 
 Получаем список песен с фильтрацией по полям:
 ```bash
-curl -X GET http://localhost:8080/songs?group=Portishead&releasedate=22.08.1994
+curl --url-query releasedate=22.08.1994 --url-query group=Portishead http://localhost:8080/songs
 ```
+
+Получаем текст песни:
+```bash
+curl --url-query song=Roads --url-query group=Portishead http://localhost:8080/text
+```
+
+Получаем конкретный куплет из текста песни:
+```bash
+curl --url-query song=Roads --url-query group=Portishead --url-query verse=2 http://localhost:8080/text
+```
+
+Удаляем песню:
+```bash
+curl -X DELETE --url-query song=Roads --url-query group=Portishead http://localhost:8080/songs
+```
+Изменяем данные о песни:
+```bash
+curl -X PATCH http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead", "releasedate": "01.01.2024"}'
+```
+
+
