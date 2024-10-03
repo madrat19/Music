@@ -25,6 +25,33 @@ docker compose up --build -d
 
 ## Документация
 * В папке api содержится swagger, описывающий весь api приложения
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Swagger UI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.css" />
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui-bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui-standalone-preset.js"></script>
+  <script>
+    window.onload = () => {
+      const ui = SwaggerUIBundle({
+        url: './swagger.yaml', // путь к вашему файлу спецификации
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout"
+      })
+    }
+  </script>
+</body>
+</html>
+
 
 ## Логирование
 Все логи сохраняются в файле app.log, получить к нему доступ можно следующим образом:
