@@ -47,3 +47,13 @@ apk --no-cache add curl
 ```bash
 curl -X POST http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead"}'
 ```
+
+Получаем список песен:
+```bash
+curl -X GET http://localhost:8080/songs 
+```
+
+Получаем список песен с фильтрацией по полям:
+```bash
+curl -X GET http://localhost:8080/songs?group=Portishead&releasedate=22.08.1994
+```
