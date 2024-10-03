@@ -42,3 +42,8 @@ docker exec -it --user=root app /bin/sh
 ```bash
 apk --no-cache add curl
 ```
+
+Добавяем новую песню:
+```bash
+curl -X POST http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead"}'
+```
