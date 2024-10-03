@@ -288,7 +288,7 @@ func UpdateSong(params map[string]string) ([]string, error) {
 		case "releasedate":
 			releaseDate, err := time.Parse("2.1.2006", value)
 			if err != nil {
-				log.Println("Invalid date format was passed: ", value)
+				log.Println("Invalid date format: ", value)
 				err = errors.New("incorrect date format")
 				return unexpectedParams, err
 			}
@@ -400,7 +400,7 @@ func getSongInfo(song, group string) (SongData, error) {
 	}
 	err = json.Unmarshal(body, &songData)
 	if err != nil {
-		log.Println("Failed to unmershal body from song info API response")
+		log.Println("Failed to unmarshal body from song info API response")
 		return songData, err
 	}
 

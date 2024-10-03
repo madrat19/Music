@@ -15,3 +15,11 @@
 2024/10/02 11:03:35 Databse connection opened
 2024/10/02 11:03:35 Got list of songs successfully
 2024/10/02 11:03:35 Databade connection closed
+2024/10/03 10:10:07 Databse connection opened
+2024/10/03 10:10:10 Failed to execute CREATE query  dial tcp: lookup postgres: no such host
+2024/10/03 10:10:10 Databade connection closed
+2024/10/03 10:10:10 Failed to create table: dial tcp: lookup postgres: no such host
+2024/10/03 10:10:45 Databse connection opened
+2024/10/03 10:10:47 Failed to execute CREATE query  dial tcp: lookup postgres: no such host
+2024/10/03 10:10:47 Databade connection closed
+2024/10/03 10:10:47 Failed to create table: dial tcp: lookup postgres: no such host

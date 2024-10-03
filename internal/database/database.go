@@ -116,9 +116,16 @@ func buildListQuery(params url.Values) string {
 
 	for param, list := range params {
 		if param != "page" && len(list) != 0 {
+			if param == "releasedate" {
+				param = "release_date"
+			}
 			emptyParams = false
 			query += `"` + param + `" IN ('`
 			for _, value := range list {
+				if param == "release_date" {
+					parsedDate, _ := time.Parse("02.01.2006", value)
+					value = parsedDate.Format("2006-01-02")
+				}
 				query += value + "', '"
 			}
 			query = query[:len(query)-3]
@@ -135,6 +142,7 @@ func buildListQuery(params url.Values) string {
 		query += fmt.Sprintf("LIMIT 10 OFFSET %d", (page-1)*10)
 	}
 
+	log.Println(query)
 	return query
 }
 
