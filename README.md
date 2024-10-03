@@ -67,14 +67,15 @@ curl --url-query song=Roads --url-query group=Portishead http://localhost:8080/t
 ```bash
 curl --url-query song=Roads --url-query group=Portishead --url-query verse=2 http://localhost:8080/text
 ```
+Изменяем данные о песни:
+```bash
+curl -X PATCH http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead", "releasedate": "01.01.2024"}'
+```
 
 Удаляем песню:
 ```bash
 curl -X DELETE --url-query song=Roads --url-query group=Portishead http://localhost:8080/songs
 ```
-Изменяем данные о песни:
-```bash
-curl -X PATCH http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead", "releasedate": "01.01.2024"}'
-```
+
 
 
