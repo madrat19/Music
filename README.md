@@ -53,6 +53,11 @@ curl -X POST http://localhost:8080/songs -H "Content-Type: application/json; ; c
 curl -X GET http://localhost:8080/songs 
 ```
 
+Получаем конкретную страницу из спсика песен (по 10 на странице):
+```bash
+curl --url-query page=1 http://localhost:8080/songs
+```
+
 Получаем список песен с фильтрацией по полям:
 ```bash
 curl --url-query releasedate=22.08.1994 --url-query group=Portishead http://localhost:8080/songs
