@@ -1,0 +1,192 @@
+openapi: 3.0.0
+info:
+  title: Music API
+  description: API for managing the list of songs and lyrics
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /songs:
+    get:
+      summary: Get a list of songs
+      description: Get a list of songs based on the filtering parameters
+      parameters:
+        - name: song
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Roads"
+        - name: group
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Portishead"        
+        - name: releasedate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "17.08.2024"
+        - name: text
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Oh\nCan't anybody see\nWe've got a war to fight\nNever find our way\nRegardless of what they say" 
+        - name: link
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "https://www.youtube.com/watch?v=Vg1jyL3cr60"          
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    song:
+                      type: string
+                      example: "Roads"
+                    group:
+                      type: string
+                      example: "Portishead"
+                    releaseDate:
+                      type: string
+                      format: date
+                      example: "12.08.1997"
+                    text:
+                      type: string
+                      example: "Oh\nCan't anybody see\nWe've got a war to fight\nNever find our way\nRegardless of what they say"
+                    link:
+                      type: string
+                      example: "https://www.youtube.com/watch?v=Vg1jyL3cr60"
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+    post:
+      description: Add new song
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                song:
+                  type: string
+                  example: "Roads"
+                group:
+                  type: string
+                  example: "Portishead"
+
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+    patch:
+      description: Update song data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                song:
+                  type: string
+                  example: "Roads"
+                group:
+                  type: string
+                  example: "Portishead"
+                releasedate:
+                  type: string
+                  format: date
+                  example: "17.03.2005"
+                text:
+                  type: string
+                  example: "Updated text"
+                link:
+                  type: string
+                  example: "https://www.youtube.com/watch?v=7x4xsJcFI3M"
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    delete:
+      description: Delete song
+      parameters:
+        - name: song
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: group
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+  /text:
+    get:
+      description: Get song text
+      parameters:
+        - name: song
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: group
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: verse
+          in: query
+          required: false
+          schema:
+            type: int
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Oh\nCan't anybody see\nWe've got a war to fight\nNever find our way\nRegardless of what they say"
+        '400':
+          description: Bad request
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
