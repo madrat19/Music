@@ -1,0 +1,65 @@
+2024/11/26 08:36:17 Database connection opened
+2024/11/26 08:37:33 Database connection opened
+2024/11/26 08:37:33 Got list of songs successfully
+2024/11/26 08:37:33 Database connection closed
+2024/11/26 08:54:54 Database connection opened
+2024/11/26 09:07:19 Database connection opened
+2024/11/26 09:07:19 Got list of songs successfully
+2024/11/26 09:07:19 Database connection closed
+2024/11/26 09:11:03 Database connection opened
+2024/11/26 09:11:03 Got list of songs successfully
+2024/11/26 09:11:03 Database connection closed
+2024/11/26 09:11:41 Database connection opened
+2024/11/26 09:11:41 Database connection closed
+2024/11/26 09:11:41 Attempt to get text of non-existent song: 'Roads' by 'Portishead'
+2024/11/26 09:16:44 Database connection opened
+2024/11/26 09:36:36 Got song info successfully: 'Roads' by 'Portishead'
+2024/11/26 09:36:36 Database connection opened
+2024/11/26 09:36:36 Database connection opened
+2024/11/26 09:36:36 Database connection closed
+2024/11/26 09:36:36 Song 'Roads' by 'Portishead' added successfully
+2024/11/26 09:36:36 Database connection closed
+2024/11/26 09:37:33 Database connection opened
+2024/11/26 09:37:33 Got list of songs successfully
+2024/11/26 09:37:33 Database connection closed
+2024/11/26 09:40:27 Got song info successfully: 'Roads' by 'Portishead'
+2024/11/26 09:40:27 Database connection opened
+2024/11/26 09:40:27 Database connection opened
+2024/11/26 09:40:27 Database connection closed
+2024/11/26 09:40:27 Attempt to add an existing song: 'Roads' by 'Portishead'
+2024/11/26 09:40:27 Database connection closed
+2024/11/26 09:40:33 Got bad response from song info API
+2024/11/26 09:40:33 Failed to get song info: 'Roadss' by 'Portishead'
+2024/11/26 09:41:01 Database connection opened
+2024/11/26 09:41:01 Failed to execute SELECT query  pq: ошибка синтаксиса (примерное положение: "10")
+2024/11/26 09:41:01 Database connection closed
+2024/11/26 09:42:54 Database connection opened
+2024/11/26 09:43:03 Database connection opened
+2024/11/26 09:43:03 Failed to execute SELECT query  pq: ошибка синтаксиса (примерное положение: "10")
+2024/11/26 09:43:03 Database connection closed
+2024/11/26 09:44:13 Database connection opened
+2024/11/26 09:44:19 Database connection opened
+2024/11/26 09:44:19 Failed to execute SELECT query  pq: ошибка синтаксиса (примерное положение: "10")
+2024/11/26 09:44:19 Database connection closed
+2024/11/26 09:45:24 Database connection opened
+2024/11/26 09:45:29 Database connection opened
+2024/11/26 09:45:29 Got list of songs successfully
+2024/11/26 09:45:29 Database connection closed
+2024/11/26 09:45:40 Database connection opened
+2024/11/26 09:45:40 Got list of songs successfully
+2024/11/26 09:45:40 Database connection closed
+2024/11/26 09:45:43 Database connection opened
+2024/11/26 09:45:43 Got list of songs successfully
+2024/11/26 09:45:43 Database connection closed
+2024/11/26 09:46:29 Database connection opened
+2024/11/26 09:46:37 Database connection opened
+2024/11/26 09:46:37 Got list of songs successfully
+2024/11/26 09:46:37 Database connection closed
+2024/11/26 09:46:40 Got bad response from song info API
+2024/11/26 09:46:40 Failed to get song info: 'Roadss' by 'Portishead'
+2024/11/26 10:27:15 Database connection opened
+2024/11/26 10:27:18 dial tcp: lookup postgres: no such host
+2024/11/26 10:29:52 Database connection opened
+2024/11/26 10:29:54 dial tcp: lookup postgres: no such host
+2024/11/26 10:30:08 Database connection opened
+2024/11/26 10:30:11 dial tcp: lookup postgres: no such host

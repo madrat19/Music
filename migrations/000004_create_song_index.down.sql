@@ -1,0 +1,1 @@
+DROP INDEX idx_song_name;

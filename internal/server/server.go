@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"music/internal/services"
@@ -121,6 +122,7 @@ func songsHandler(writer http.ResponseWriter, request *http.Request) {
 		var newSong map[string]string
 		err = json.Unmarshal(body, &newSong)
 		if err != nil {
+			fmt.Println(err)
 			http.Error(writer, "Invalid JSON format", http.StatusBadRequest)
 			return
 		}

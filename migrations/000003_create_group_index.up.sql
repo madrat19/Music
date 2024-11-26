@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_group_name ON "Group" (name);

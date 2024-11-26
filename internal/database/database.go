@@ -24,7 +24,7 @@ type SongData struct {
 var config *tools.Config = tools.GetConfig()
 
 // Открывает соединение с БД
-func openConnection(config *tools.Config) (*sql.DB, error) {
+func OpenConnection(config *tools.Config) (*sql.DB, error) {
 	conn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		config.Host, config.Port, config.Username, config.Password, config.DBName)
 
@@ -33,21 +33,21 @@ func openConnection(config *tools.Config) (*sql.DB, error) {
 		log.Println("Failed to connect to the database: ", err)
 		return nil, err
 	}
-	log.Println("Databse connection opened")
+	log.Println("Database connection opened")
 	return db, nil
 }
 
 // Проверяет существование песни в БД
-func exists(song, group string) (int, error) {
-	db, err := openConnection(config)
+func Exists(song, group string) (int, error) {
+	db, err := OpenConnection(config)
 	if err != nil {
 		return -1, err
 	}
 	defer db.Close()
-	defer log.Println("Databse connection closed")
+	defer log.Println("Database connection closed")
 
 	userID := -1
-	statement := fmt.Sprintf(`SELECT "id" FROM "music" where "group" = '%s' and song ='%s'`, group, song)
+	statement := fmt.Sprintf(`SELECT s.song_id FROM "Song" s JOIN "Group" g ON s.group_id = g.group_id WHERE s.name = '%s' AND g.name = '%s'`, song, group)
 	rows, err := db.Query(statement)
 	if err != nil {
 		log.Println("Failed to execute SELECT query: ", err)
@@ -68,16 +68,16 @@ func exists(song, group string) (int, error) {
 }
 
 // Получает данные о песни по id
-func getSong(id int) (SongData, error) {
+func GetSong(id int) (SongData, error) {
 	data := SongData{}
-	db, err := openConnection(config)
+	db, err := OpenConnection(config)
 	if err != nil {
 		return data, err
 	}
 	defer db.Close()
-	defer log.Println("Databse connection closed")
+	defer log.Println("Database connection closed")
 
-	statement := fmt.Sprintf(`SELECT "song", "group", "release_date", "text", "link" FROM "music" WHERE id = %d`, id)
+	statement := fmt.Sprintf(`SELECT s.name, g.name, "release_date", "text", "link" FROM "Song" s JOIN "Group" g on s.group_id = g.group_id WHERE song_id = %d`, id)
 	rows, err := db.Query(statement)
 	if err != nil {
 		log.Println("Failed to execute SELECT query: ", err)
@@ -103,8 +103,8 @@ func getSong(id int) (SongData, error) {
 }
 
 // Конструирует запрос на основе фильтра
-func buildListQuery(params url.Values) string {
-	query := `SELECT "song", "group", "release_date", "text", "link" FROM "music"`
+func BuildListQuery(params url.Values) string {
+	query := `SELECT s.name song, g.name "group", "release_date", "text", "link" FROM "Song" s JOIN "Group" g on s.group_id = g.group_id `
 	emptyParams := true
 
 	for param, list := range params {
@@ -120,7 +120,13 @@ func buildListQuery(params url.Values) string {
 				param = "release_date"
 			}
 			emptyParams = false
-			query += `"` + param + `" IN ('`
+			if param == "song" {
+				query += `s.name IN ('`
+			} else if param == "group" {
+				query += `g.name IN ('`
+			} else {
+				query += `'` + param + `' IN ('`
+			}
 			for _, value := range list {
 				if param == "release_date" {
 					parsedDate, _ := time.Parse("02.01.2006", value)
@@ -142,20 +148,19 @@ func buildListQuery(params url.Values) string {
 		query += fmt.Sprintf("LIMIT 10 OFFSET %d", (page-1)*10)
 	}
 
-	log.Println(query)
 	return query
 }
 
 // Добавляет новую песню
 func AddSong(data SongData) error {
-	db, err := openConnection(config)
+	db, err := OpenConnection(config)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 	defer log.Println("Database connection closed")
 
-	userID, err := exists(data.Song, data.Group)
+	userID, err := Exists(data.Song, data.Group)
 	if err != nil {
 		return err
 	}
@@ -165,12 +170,33 @@ func AddSong(data SongData) error {
 		return err
 	}
 
-	statement := `insert into "music" ("group", "song", "release_date", "text", link)
-		values ($1, $2, $3, $4, $5)`
+	statement1 := `
+		INSERT INTO "Group" (name)
+		SELECT CAST($1 AS VARCHAR)
+		WHERE NOT EXISTS (
+    		SELECT 1 
+    		FROM "Group" 
+    		WHERE name = $1
+		);`
 
-	_, err = db.Exec(statement, data.Group, data.Song, data.ReleaseDate, data.Text, data.Link)
+	_, err = db.Exec(statement1, data.Group)
 	if err != nil {
-		log.Println("Failed to execute INSERT query: ", err)
+		log.Println("Failed to execute INSERT query 1: ", err)
+		return err
+	}
+
+	statement2 := `INSERT INTO "Song" ("name", "release_date", "text", "link", "group_id")
+		VALUES	($2, $3, $4, $5, 
+			(
+			SELECT group_id
+			FROM "Group"
+			WHERE name = $1
+			)
+				);`
+
+	_, err = db.Exec(statement2, data.Group, data.Song, data.ReleaseDate, data.Text, data.Link)
+	if err != nil {
+		log.Println("Failed to execute INSERT query 2: ", err)
 		return err
 	}
 	log.Printf("Song '%s' by '%s' added successfully\n", data.Song, data.Group)
@@ -179,14 +205,14 @@ func AddSong(data SongData) error {
 
 // Удаляет песню
 func DeleteSong(song, group string) error {
-	db, err := openConnection(config)
+	db, err := OpenConnection(config)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 	defer log.Println("Database connection closed")
 
-	id, err := exists(song, group)
+	id, err := Exists(song, group)
 	if err != nil {
 		return err
 	}
@@ -196,7 +222,7 @@ func DeleteSong(song, group string) error {
 		return err
 	}
 
-	statement := `delete from "music" where id = $1`
+	statement := `delete from "Song" where song_id = $1`
 	_, err = db.Exec(statement, id)
 	if err != nil {
 		log.Println("Failed to execute DELETE query: ", err)
@@ -209,14 +235,14 @@ func DeleteSong(song, group string) error {
 
 // Обновляет информацию о песне
 func UpdateSong(data SongData) error {
-	db, err := openConnection(config)
+	db, err := OpenConnection(config)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 	defer log.Println("Database connection closed")
 
-	id, err := exists(data.Song, data.Group)
+	id, err := Exists(data.Song, data.Group)
 	if err != nil {
 		return err
 	}
@@ -226,7 +252,7 @@ func UpdateSong(data SongData) error {
 		return err
 	}
 
-	oldData, err := getSong(id)
+	oldData, err := GetSong(id)
 	if err != nil {
 		return err
 	}
@@ -241,7 +267,7 @@ func UpdateSong(data SongData) error {
 		data.Link = oldData.Link
 	}
 
-	statement := `update "music" set "release_date" = $1, "text" = $2, "link" = $3 where "id" = $4`
+	statement := `update "Song" set "release_date" = $1, "text" = $2, "link" = $3 where "song_id" = $4`
 	_, err = db.Exec(statement, data.ReleaseDate, data.Text, data.Link, id)
 	if err != nil {
 		log.Println("Failed to execute UPDATE query: ", err)
@@ -254,7 +280,7 @@ func UpdateSong(data SongData) error {
 
 // Получает текст песни
 func GetText(song, group string) (string, error) {
-	id, err := exists(song, group)
+	id, err := Exists(song, group)
 	if err != nil {
 		return "", err
 	}
@@ -264,7 +290,7 @@ func GetText(song, group string) (string, error) {
 		return "", err
 	}
 
-	data, err := getSong(id)
+	data, err := GetSong(id)
 	if err != nil {
 		return "", err
 	}
@@ -278,14 +304,14 @@ func GetText(song, group string) (string, error) {
 // Получает список песен
 func ListSongs(params url.Values) ([]SongData, error) {
 	data := []SongData{}
-	db, err := openConnection(config)
+	db, err := OpenConnection(config)
 	if err != nil {
 		return data, err
 	}
 	defer db.Close()
-	defer log.Println("Databade connection closed")
+	defer log.Println("Database connection closed")
 
-	statment := buildListQuery(params)
+	statment := BuildListQuery(params)
 	rows, err := db.Query(statment)
 	if err != nil {
 		log.Println("Failed to execute SELECT query ", err)
@@ -311,31 +337,4 @@ func ListSongs(params url.Values) ([]SongData, error) {
 
 	log.Println("Got list of songs successfully")
 	return data, nil
-}
-
-// Создает таблицу
-func InitTable() error {
-	db, err := openConnection(config)
-	if err != nil {
-		return err
-	}
-	defer db.Close()
-	defer log.Println("Databade connection closed")
-
-	statment := `CREATE TABLE IF NOT EXISTS music (
-    id SERIAL PRIMARY KEY,
-    "group" VARCHAR(255) NOT NULL,
-    song VARCHAR(255) NOT NULL,
-    release_date DATE NOT NULL,
-    text TEXT,
-    link VARCHAR(255)
-);`
-	_, err = db.Query(statment)
-	if err != nil {
-		log.Println("Failed to execute CREATE query ", err)
-		return err
-	}
-
-	log.Println("Table 'music' created")
-	return nil
 }
