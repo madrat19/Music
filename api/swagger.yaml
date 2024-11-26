@@ -48,6 +48,12 @@ paths:
           schema:
             type: integer
             example: 1
+        - name: onpage
+          in: query
+          required: false
+          schema:
+            type: integer
+            example: 5
       responses:
         '200':
           description: Ok

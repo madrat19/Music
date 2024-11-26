@@ -37,6 +37,12 @@ func songsHandler(writer http.ResponseWriter, request *http.Request) {
 			} else if err.Error() == "'page' requires only 1 value" {
 				http.Error(writer, "'page' requires only 1 value", http.StatusBadRequest)
 				return
+			} else if err.Error() == "'onpage' requires only 1 value" {
+				http.Error(writer, "'onpage' requires only 1 value", http.StatusBadRequest)
+				return
+			} else if err.Error() == "onpage is not a number" {
+				http.Error(writer, `"onpage" requires a positive number`, http.StatusBadRequest)
+				return
 			} else if err.Error() == "incorrect date format" {
 				http.Error(writer, "Invalid date format: "+query["releasedate"][0], http.StatusBadRequest)
 				return

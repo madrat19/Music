@@ -34,6 +34,7 @@ func GetSongs(params url.Values) ([]database.SongData, []string, error) {
 		"text":        true,
 		"link":        true,
 		"page":        true,
+		"onpage":      true,
 	}
 
 	var unexpectedParams []string
@@ -66,6 +67,20 @@ func GetSongs(params url.Values) ([]database.SongData, []string, error) {
 		if err != nil || page < 1 {
 			log.Println("Invalid 'page' format passed: ", params["page"][0])
 			err := errors.New("page is not a number")
+			return songs, unexpectedParams, err
+		}
+	}
+
+	// Валидация параметра onpage
+	if len(params["onpage"]) > 1 {
+		log.Println("Invalid 'onpage' format passed: ", params["onpage"])
+		err := errors.New("'onpage' requires only 1 value")
+		return songs, unexpectedParams, err
+	} else if len(params["onpage"]) != 0 {
+		onpage, err := strconv.Atoi(params["onpage"][0])
+		if err != nil || onpage < 1 {
+			log.Println("Invalid 'onpage' format passed: ", params["onpage"][0])
+			err := errors.New("onpage is not a number")
 			return songs, unexpectedParams, err
 		}
 	}

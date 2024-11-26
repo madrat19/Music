@@ -108,14 +108,14 @@ func BuildListQuery(params url.Values) string {
 	emptyParams := true
 
 	for param, list := range params {
-		if len(list) > 0 && param != "page" {
+		if len(list) > 0 && param != "page" && param != "onpage" {
 			query += " WHERE "
 			break
 		}
 	}
 
 	for param, list := range params {
-		if param != "page" && len(list) != 0 {
+		if param != "page" && param != "onpage" && len(list) != 0 {
 			if param == "releasedate" {
 				param = "release_date"
 			}
@@ -143,11 +143,19 @@ func BuildListQuery(params url.Values) string {
 		query = query[:len(query)-4]
 	}
 
+	// Дефолтное значение числа песен на странице
+	onpage := 5
+
+	if len(params["onpage"]) != 0 {
+		onpage, _ = strconv.Atoi(params["onpage"][0])
+		query += fmt.Sprintf("LIMIT %d ", onpage)
+	}
 	if len(params["page"]) != 0 {
 		page, _ := strconv.Atoi(params["page"][0])
-		query += fmt.Sprintf("LIMIT 10 OFFSET %d", (page-1)*10)
+		query += fmt.Sprintf("OFFSET %d", (page-1)*onpage)
 	}
 
+	fmt.Println(query)
 	return query
 }
 
