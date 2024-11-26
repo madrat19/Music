@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("Failed to open log file:", err)
 	}
 	defer file.Close()
-	//log.SetOutput(file)
+	log.SetOutput(file)
 
 	//Миграции
 	config := tools.GetConfig()
