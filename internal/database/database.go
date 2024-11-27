@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"music/tools"
 	"net/url"
 	"strconv"
@@ -30,10 +29,10 @@ func OpenConnection(config *tools.Config) (*sql.DB, error) {
 
 	db, err := sql.Open("postgres", conn)
 	if err != nil {
-		log.Println("Failed to connect to the database: ", err)
+		tools.Logger.Error("Failed to connect to the database: ", err)
 		return nil, err
 	}
-	log.Println("Database connection opened")
+	tools.Logger.Info("Database connection opened")
 	return db, nil
 }
 
@@ -44,13 +43,13 @@ func Exists(song, group string) (int, error) {
 		return -1, err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	userID := -1
 	statement := fmt.Sprintf(`SELECT s.song_id FROM "Song" s JOIN "Group" g ON s.group_id = g.group_id WHERE s.name = '%s' AND g.name = '%s'`, song, group)
 	rows, err := db.Query(statement)
 	if err != nil {
-		log.Println("Failed to execute SELECT query: ", err)
+		tools.Logger.Error("Failed to execute SELECT query: ", err)
 		return -1, err
 	}
 
@@ -58,7 +57,7 @@ func Exists(song, group string) (int, error) {
 		var id int
 		err = rows.Scan(&id)
 		if err != nil {
-			log.Println("Failed to scan from sql.Rows: ", err)
+			tools.Logger.Error("Failed to scan from sql.Rows: ", err)
 			return -1, err
 		}
 		userID = id
@@ -75,12 +74,12 @@ func GetSong(id int) (SongData, error) {
 		return data, err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	statement := fmt.Sprintf(`SELECT s.name, g.name, "release_date", "text", "link" FROM "Song" s JOIN "Group" g on s.group_id = g.group_id WHERE song_id = %d`, id)
 	rows, err := db.Query(statement)
 	if err != nil {
-		log.Println("Failed to execute SELECT query: ", err)
+		tools.Logger.Error("Failed to execute SELECT query: ", err)
 		return data, err
 	}
 
@@ -88,12 +87,12 @@ func GetSong(id int) (SongData, error) {
 		var dateString string
 		err = rows.Scan(&data.Song, &data.Group, &dateString, &data.Text, &data.Link)
 		if err != nil {
-			log.Println("Failed to scan from sql.Rows: ", err)
+			tools.Logger.Error("Failed to scan from sql.Rows: ", err)
 			return data, err
 		}
 		data.ReleaseDate, err = time.Parse("2006-01-02T15:04:05Z07:00", dateString)
 		if err != nil {
-			log.Println("Failed to parse time: ", err)
+			tools.Logger.Error("Failed to parse time: ", err)
 			return data, err
 		}
 
@@ -125,7 +124,7 @@ func BuildListQuery(params url.Values) string {
 			} else if param == "group" {
 				query += `g.name IN ('`
 			} else {
-				query += `'` + param + `' IN ('`
+				query += `"` + param + `" IN ('`
 			}
 			for _, value := range list {
 				if param == "release_date" {
@@ -155,7 +154,6 @@ func BuildListQuery(params url.Values) string {
 		query += fmt.Sprintf("OFFSET %d", (page-1)*onpage)
 	}
 
-	fmt.Println(query)
 	return query
 }
 
@@ -166,14 +164,14 @@ func AddSong(data SongData) error {
 		return err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	userID, err := Exists(data.Song, data.Group)
 	if err != nil {
 		return err
 	}
 	if userID != -1 {
-		log.Printf("Attempt to add an existing song: '%s' by '%s'\n", data.Song, data.Group)
+		tools.Logger.Info(fmt.Sprintf("Attempt to add an existing song: '%s' by '%s'\n", data.Song, data.Group))
 		err = errors.New("song already exists")
 		return err
 	}
@@ -189,7 +187,7 @@ func AddSong(data SongData) error {
 
 	_, err = db.Exec(statement1, data.Group)
 	if err != nil {
-		log.Println("Failed to execute INSERT query 1: ", err)
+		tools.Logger.Error("Failed to execute INSERT query 1: ", err)
 		return err
 	}
 
@@ -204,10 +202,10 @@ func AddSong(data SongData) error {
 
 	_, err = db.Exec(statement2, data.Group, data.Song, data.ReleaseDate, data.Text, data.Link)
 	if err != nil {
-		log.Println("Failed to execute INSERT query 2: ", err)
+		tools.Logger.Error("Failed to execute INSERT query 2: ", err)
 		return err
 	}
-	log.Printf("Song '%s' by '%s' added successfully\n", data.Song, data.Group)
+	tools.Logger.Info(fmt.Sprintf("Song '%s' by '%s' added successfully\n", data.Song, data.Group))
 	return nil
 }
 
@@ -218,14 +216,14 @@ func DeleteSong(song, group string) error {
 		return err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	id, err := Exists(song, group)
 	if err != nil {
 		return err
 	}
 	if id == -1 {
-		log.Printf("Attempt to delete a non-existent song: '%s' by '%s'\n", song, group)
+		tools.Logger.Info(fmt.Sprintf("Attempt to delete a non-existent song: '%s' by '%s'\n", song, group))
 		err = errors.New("song does not exist")
 		return err
 	}
@@ -233,11 +231,11 @@ func DeleteSong(song, group string) error {
 	statement := `delete from "Song" where song_id = $1`
 	_, err = db.Exec(statement, id)
 	if err != nil {
-		log.Println("Failed to execute DELETE query: ", err)
+		tools.Logger.Error("Failed to execute DELETE query: ", err)
 		return err
 	}
 
-	log.Printf("Song '%s' by '%s' deleted successfully\n", song, group)
+	tools.Logger.Info(fmt.Sprintf("Song '%s' by '%s' deleted successfully\n", song, group))
 	return nil
 }
 
@@ -248,14 +246,14 @@ func UpdateSong(data SongData) error {
 		return err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	id, err := Exists(data.Song, data.Group)
 	if err != nil {
 		return err
 	}
 	if id == -1 {
-		log.Printf("Attempt to update a non-existent song: '%s' by '%s'\n", data.Song, data.Group)
+		tools.Logger.Info(fmt.Sprintf("Attempt to update a non-existent song: '%s' by '%s'\n", data.Song, data.Group))
 		err = errors.New("song does not exist")
 		return err
 	}
@@ -278,11 +276,11 @@ func UpdateSong(data SongData) error {
 	statement := `update "Song" set "release_date" = $1, "text" = $2, "link" = $3 where "song_id" = $4`
 	_, err = db.Exec(statement, data.ReleaseDate, data.Text, data.Link, id)
 	if err != nil {
-		log.Println("Failed to execute UPDATE query: ", err)
+		tools.Logger.Error("Failed to execute UPDATE query: ", err)
 		return err
 	}
 
-	log.Printf("Song '%s' by '%s' updated successfully\n", data.Song, data.Group)
+	tools.Logger.Info(fmt.Sprintf("Song '%s' by '%s' updated successfully\n", data.Song, data.Group))
 	return nil
 }
 
@@ -293,7 +291,7 @@ func GetText(song, group string) (string, error) {
 		return "", err
 	}
 	if id == -1 {
-		log.Printf("Attempt to get text of non-existent song: '%s' by '%s'\n", song, group)
+		tools.Logger.Info(fmt.Sprintf("Attempt to get text of non-existent song: '%s' by '%s'\n", song, group))
 		err = errors.New("song does not exist")
 		return "", err
 	}
@@ -305,7 +303,7 @@ func GetText(song, group string) (string, error) {
 
 	text := data.Text
 
-	log.Printf("Got text of '%s' by '%s' successfully\n", song, group)
+	tools.Logger.Info(fmt.Sprintf("Got text of '%s' by '%s' successfully\n", song, group))
 	return text, nil
 }
 
@@ -317,12 +315,12 @@ func ListSongs(params url.Values) ([]SongData, error) {
 		return data, err
 	}
 	defer db.Close()
-	defer log.Println("Database connection closed")
+	defer tools.Logger.Info("Database connection closed")
 
 	statment := BuildListQuery(params)
 	rows, err := db.Query(statment)
 	if err != nil {
-		log.Println("Failed to execute SELECT query ", err)
+		tools.Logger.Error("Failed to execute SELECT query ", err)
 		return data, err
 	}
 
@@ -331,18 +329,18 @@ func ListSongs(params url.Values) ([]SongData, error) {
 		dateString := ""
 		err = rows.Scan(&temp.Song, &temp.Group, &dateString, &temp.Text, &temp.Link)
 		if err != nil {
-			log.Println("Failed to scan sql.Rows: ", err)
+			tools.Logger.Error("Failed to scan sql.Rows: ", err)
 			return data, err
 		}
 		temp.ReleaseDate, err = time.Parse("2006-01-02T15:04:05Z07:00", dateString)
 		if err != nil {
-			log.Println("Failed ti parse time: ", err)
+			tools.Logger.Error("Failed to parse time: ", err)
 			return data, err
 		}
 		data = append(data, temp)
 
 	}
 
-	log.Println("Got list of songs successfully")
+	tools.Logger.Info("Got list of songs successfully")
 	return data, nil
 }

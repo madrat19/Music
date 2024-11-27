@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"music/internal/services"
 	"music/tools"
 	"net/http"
@@ -16,8 +15,9 @@ func RunServer() {
 	serverAddr := tools.GetConfig().ServerAddr
 	http.HandleFunc("/songs", songsHandler)
 	http.HandleFunc("/text", textHandler)
+	tools.Logger.Info(fmt.Sprintf("Starting server on %s", serverAddr))
 	err := http.ListenAndServe(serverAddr, nil)
-	log.Fatal(err)
+	tools.Logger.Fatal("Server is down: ", err)
 }
 
 // Обработчик /songs

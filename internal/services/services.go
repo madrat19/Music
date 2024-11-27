@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"music/internal/database"
 	"music/tools"
 	"net/http"
@@ -52,20 +51,20 @@ func GetSongs(params url.Values) ([]database.SongData, []string, error) {
 
 	// Если нашли лишние параметры
 	if len(unexpectedParams) != 0 {
-		log.Println("Unexpected parameters passed: ", strings.Join(unexpectedParams, ", "))
+		tools.Logger.Info(fmt.Sprintf("Unexpected parameters passed: %s", strings.Join(unexpectedParams, ", ")))
 		err := errors.New("unexpected params")
 		return songs, unexpectedParams, err
 	}
 
 	// Валидация параметра page
 	if len(params["page"]) > 1 {
-		log.Println("Invalid 'page' format passed: ", params["page"])
+		tools.Logger.Info(fmt.Sprintf("Invalid 'page' format passed: %s", params["page"]))
 		err := errors.New("'page' requires only 1 value")
 		return songs, unexpectedParams, err
 	} else if len(params["page"]) != 0 {
 		page, err := strconv.Atoi(params["page"][0])
 		if err != nil || page < 1 {
-			log.Println("Invalid 'page' format passed: ", params["page"][0])
+			tools.Logger.Info(fmt.Sprintf("Invalid 'page' format passed: %s", params["page"][0]))
 			err := errors.New("page is not a number")
 			return songs, unexpectedParams, err
 		}
@@ -73,13 +72,13 @@ func GetSongs(params url.Values) ([]database.SongData, []string, error) {
 
 	// Валидация параметра onpage
 	if len(params["onpage"]) > 1 {
-		log.Println("Invalid 'onpage' format passed: ", params["onpage"])
+		tools.Logger.Info(fmt.Sprintf("Invalid 'onpage' format passed: %s", params["onpage"]))
 		err := errors.New("'onpage' requires only 1 value")
 		return songs, unexpectedParams, err
 	} else if len(params["onpage"]) != 0 {
 		onpage, err := strconv.Atoi(params["onpage"][0])
 		if err != nil || onpage < 1 {
-			log.Println("Invalid 'onpage' format passed: ", params["onpage"][0])
+			tools.Logger.Info(fmt.Sprintf("Invalid 'onpage' format passed: %s", params["onpage"][0]))
 			err := errors.New("onpage is not a number")
 			return songs, unexpectedParams, err
 		}
@@ -89,7 +88,7 @@ func GetSongs(params url.Values) ([]database.SongData, []string, error) {
 	if date, ok := params["releasedate"]; ok {
 		_, err := time.Parse("2.1.2006", date[0])
 		if err != nil {
-			log.Println("Invalid date format passed: ", date[0])
+			tools.Logger.Info(fmt.Sprintf("Invalid date format passed: %s", date[0]))
 			err := errors.New("incorrect date format")
 			return songs, unexpectedParams, err
 		}
@@ -133,7 +132,7 @@ func GetText(params url.Values) (string, []string, error) {
 
 	// Если нашли лишние параметры
 	if len(unexpectedParams) != 0 {
-		log.Println("Unexpected parameters passed: ", strings.Join(unexpectedParams, ", "))
+		tools.Logger.Info(fmt.Sprintf("Unexpected parameters passed: %s", strings.Join(unexpectedParams, ", ")))
 		err := errors.New("unexpected params")
 		return text, unexpectedParams, err
 	}
@@ -141,12 +140,12 @@ func GetText(params url.Values) (string, []string, error) {
 	// Валидация пераметров song и group
 	for param := range requiredParams {
 		if _, ok := params[param]; !ok {
-			log.Printf("Required parameter '%s' was not passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("Required parameter '%s' was not passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' parameter is required", param)
 			err := errors.New(errorMessage)
 			return text, unexpectedParams, err
 		} else if len(params[param]) != 1 {
-			log.Printf("To many '%s' parameters was passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("To many '%s' parameters was passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' requires only 1 value", param)
 			err := errors.New(errorMessage)
 			return text, unexpectedParams, err
@@ -155,13 +154,13 @@ func GetText(params url.Values) (string, []string, error) {
 
 	// Валидация параметра verse
 	if len(params["verse"]) > 1 {
-		log.Println("To many 'verse' parameters was passed")
+		tools.Logger.Info("To many 'verse' parameters was passed")
 		err := errors.New("'verse' requires only 1 value")
 		return text, unexpectedParams, err
 	} else if len(params["verse"]) != 0 {
 		verse, err := strconv.Atoi(params["verse"][0])
 		if err != nil || verse < 1 {
-			log.Println("Invalid 'verse' format was passed")
+			tools.Logger.Info("Invalid 'verse' format was passed")
 			err := errors.New("'verse' requires a positive number")
 			return text, unexpectedParams, err
 		}
@@ -215,7 +214,7 @@ func DeleteSong(params url.Values) ([]string, error) {
 
 	// Если нашли лишние параметры
 	if len(unexpectedParams) != 0 {
-		log.Println("Unexpected parameters passed: ", strings.Join(unexpectedParams, ", "))
+		tools.Logger.Info(fmt.Sprintf("Unexpected parameters passed: %s", strings.Join(unexpectedParams, ", ")))
 		err := errors.New("unexpected params")
 		return unexpectedParams, err
 	}
@@ -223,12 +222,12 @@ func DeleteSong(params url.Values) ([]string, error) {
 	// Валидация пераметров
 	for param := range requiredParams {
 		if _, ok := params[param]; !ok {
-			log.Printf("Required parameter '%s' was not passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("Required parameter '%s' was not passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' parameter is required", param)
 			err := errors.New(errorMessage)
 			return unexpectedParams, err
 		} else if len(params[param]) != 1 {
-			log.Printf("To many '%s' parameters was passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("To many '%s' parameters was passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' requires only 1 value", param)
 			err := errors.New(errorMessage)
 			return unexpectedParams, err
@@ -276,7 +275,7 @@ func UpdateSong(params map[string]string) ([]string, error) {
 
 	// Если нашли лишние параметры
 	if len(unexpectedParams) != 0 {
-		log.Println("Unexpected parameters passed: ", strings.Join(unexpectedParams, ", "))
+		tools.Logger.Info(fmt.Sprintf("Unexpected parameters passed: %s", strings.Join(unexpectedParams, ", ")))
 		err := errors.New("unexpected params")
 		return unexpectedParams, err
 	}
@@ -284,7 +283,7 @@ func UpdateSong(params map[string]string) ([]string, error) {
 	// Проверка на обязательные параметры
 	for param := range requiredParams {
 		if _, ok := params[param]; !ok {
-			log.Printf("Required parameter '%s' was not passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("Required parameter '%s' was not passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' parameter is required", param)
 			err := errors.New(errorMessage)
 			return unexpectedParams, err
@@ -303,7 +302,7 @@ func UpdateSong(params map[string]string) ([]string, error) {
 		case "releasedate":
 			releaseDate, err := time.Parse("2.1.2006", value)
 			if err != nil {
-				log.Println("Invalid date format: ", value)
+				tools.Logger.Info(fmt.Sprintf("Invalid date format: %s", value))
 				err = errors.New("incorrect date format")
 				return unexpectedParams, err
 			}
@@ -347,7 +346,7 @@ func AddSong(params map[string]string) ([]string, error) {
 
 	// Если нашли лишние параметры
 	if len(unexpectedParams) != 0 {
-		log.Println("Unexpected parameters passed: ", strings.Join(unexpectedParams, ", "))
+		tools.Logger.Info(fmt.Sprintf("Unexpected parameters passed: %s", strings.Join(unexpectedParams, ", ")))
 		err := errors.New("unexpected params")
 		return unexpectedParams, err
 	}
@@ -355,7 +354,7 @@ func AddSong(params map[string]string) ([]string, error) {
 	// Проверка на обязательные параметры
 	for param := range requiredParams {
 		if _, ok := params[param]; !ok {
-			log.Printf("Required parameter '%s' was not passed\n", param)
+			tools.Logger.Info(fmt.Sprintf("Required parameter '%s' was not passed\n", param))
 			errorMessage := fmt.Sprintf("'%s' parameter is required", param)
 			err := errors.New(errorMessage)
 			return unexpectedParams, err
@@ -366,7 +365,7 @@ func AddSong(params map[string]string) ([]string, error) {
 	// Получаем информацию о песни
 	data, err := getSongInfo(params["song"], params["group"])
 	if err != nil {
-		log.Printf("Failed to get song info: '%s' by '%s'\n", params["song"], params["group"])
+		tools.Logger.Error(fmt.Sprintf("Failed to get song info: '%s' by '%s'\n", params["song"], params["group"]), err)
 		err = errors.New("failed to get song info")
 		return unexpectedParams, err
 	}
@@ -399,30 +398,30 @@ func getSongInfo(song, group string) (SongData, error) {
 	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 	resp, err := http.Get(fullURL)
 	if err != nil {
-		log.Println("Failed to connect to song info API")
+		tools.Logger.Error("Failed to connect to song info API: ", err)
 		return songData, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Println("Got bad response from song info API")
+		tools.Logger.Error("Got bad response from song info API: code ", errors.New(string(resp.StatusCode)))
 		return songData, errors.New("failed to get song info")
 	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("Failed to read body from song info API response")
+		tools.Logger.Error("Failed to read body from song info API response: ", err)
 		return songData, err
 	}
 	err = json.Unmarshal(body, &songData)
 	if err != nil {
-		log.Println("Failed to unmarshal body from song info API response")
+		tools.Logger.Error("Failed to unmarshal body from song info API response: ", err)
 		return songData, err
 	}
 
 	songData.Song = song
 	songData.Group = group
 
-	log.Printf("Got song info successfully: '%s' by '%s'\n", song, group)
+	tools.Logger.Info(fmt.Sprintf("Got song info successfully: '%s' by '%s'\n", song, group))
 	return songData, nil
 }
 

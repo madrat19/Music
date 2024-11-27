@@ -14,6 +14,7 @@ type Config struct {
 	Password      string
 	ServerAddr    string
 	MusicInfoAddr string
+	LogLevel      string
 }
 
 var config *Config
@@ -33,6 +34,7 @@ func GetConfig() *Config {
 		config.Password = os.Getenv("PGPASSWORD")
 		config.ServerAddr = os.Getenv("SERVER")
 		config.MusicInfoAddr = os.Getenv("MUSICINFO")
+		config.LogLevel = os.Getenv("LOGLEVEL")
 	}
 
 	return config
