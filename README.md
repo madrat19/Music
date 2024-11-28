@@ -26,6 +26,10 @@ docker compose up --build -d
 
 ## Документация
 * В папке api содержится swagger, описывающий весь api приложения
+* Swagger UI будет доступен после запуска приложения по адресу:
+```bash
+http://localhost:8080/swagger/index.html
+```
 
 
 ## Логирование
