@@ -329,7 +329,7 @@ func UpdateSong(params map[string]string) ([]string, error) {
 }
 
 // Добавляет новую песню
-func AddSong(params map[string]string) ([]string, error) {
+func AddSong(params url.Values) ([]string, error) {
 	requiredParams := map[string]bool{
 		"song":  true,
 		"group": true,
@@ -363,7 +363,7 @@ func AddSong(params map[string]string) ([]string, error) {
 	}
 
 	// Получаем информацию о песни
-	data, err := getSongInfo(params["song"], params["group"])
+	data, err := getSongInfo(params["song"][0], params["group"][0])
 	if err != nil {
 		tools.Logger.Error(fmt.Sprintf("Failed to get song info: '%s' by '%s'\n", params["song"], params["group"]), err)
 		err = errors.New("failed to get song info")

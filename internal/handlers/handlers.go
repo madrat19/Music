@@ -1,27 +1,24 @@
-package server
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	_ "music/api"
 	"music/internal/services"
-	"music/tools"
 	"net/http"
 	"strings"
+	"time"
 )
 
-// Запускает сервер
-func RunServer() {
-	serverAddr := tools.GetConfig().ServerAddr
-	http.HandleFunc("/songs", songsHandler)
-	http.HandleFunc("/text", textHandler)
-	tools.Logger.Info(fmt.Sprintf("Starting server on %s", serverAddr))
-	err := http.ListenAndServe(serverAddr, nil)
-	tools.Logger.Fatal("Server is down: ", err)
+type SongData struct {
+	Song        string    `json:"song"`
+	Group       string    `json:"group"`
+	ReleaseDate time.Time `json:"releaseDate"`
+	Text        string    `json:"text"`
+	Link        string    `json:"link"`
 }
 
-// Обработчик /songs
-func songsHandler(writer http.ResponseWriter, request *http.Request) {
+func SongsHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == "GET" {
 		query := request.URL.Query()
 		songs, unexpectedParams, err := services.GetSongs(query)
@@ -118,22 +115,8 @@ func songsHandler(writer http.ResponseWriter, request *http.Request) {
 		return
 
 	} else if request.Method == "POST" {
-		body, err := io.ReadAll(request.Body)
-		if err != nil {
-			http.Error(writer, "Can't read request body", http.StatusBadRequest)
-			return
-		}
-		defer request.Body.Close()
-
-		var newSong map[string]string
-		err = json.Unmarshal(body, &newSong)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(writer, "Invalid JSON format", http.StatusBadRequest)
-			return
-		}
-
-		unexpectedParams, err := services.AddSong(newSong)
+		query := request.URL.Query()
+		unexpectedParams, err := services.AddSong(query)
 		if err != nil {
 			if err.Error() == "unexpected params" {
 				errorMessage := "Unexpected parameters: " + strings.Join(unexpectedParams, ", ")
@@ -161,7 +144,7 @@ func songsHandler(writer http.ResponseWriter, request *http.Request) {
 }
 
 // Обработчик /text
-func textHandler(writer http.ResponseWriter, request *http.Request) {
+func TextHandler(writer http.ResponseWriter, request *http.Request) {
 	if request.Method == "GET" {
 		query := request.URL.Query()
 		text, unexpectedParams, err := services.GetText(query)
@@ -191,4 +174,89 @@ func textHandler(writer http.ResponseWriter, request *http.Request) {
 		http.Error(writer, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
+}
+
+// Обертки над SongHandler сделаны для генерации Swagger
+
+// @Summary      Get a list of songs
+// @Description  Get a list of songs based on filtering parameters.
+// @Tags         songs
+// @Accept       json
+// @Produce      json
+// @Param        song        query    string  false  "Song name"
+// @Param        group       query    string  false  "Group name"
+// @Param        releasedate query   string  false  "Release date"
+// @Param        text        query    string  false  "Song lyrics"
+// @Param        link        query    string  false  "Video link"
+// @Param        page        query    int     false  "Page number"
+// @Param        onpage      query    int     false  "Items per page"
+// @Success      200       {array}  SongData    "List of songs"
+// @Failure      400        {string} string  "Bad request"
+// @Failure      500        {string} string  "Internal server error"
+// @Router       /songs [get]
+func getSongHandler(w http.ResponseWriter, r *http.Request) {
+	SongsHandler(w, r)
+}
+
+// @Summary      Add a new song
+// @Description  Add a new song to the database.
+// @Tags         songs
+// @Accept       json
+// @Produce      json
+// @Param        song        query    string  false  "Song name"
+// @Param        group       query    string  false  "Group name"
+// @Success      200   {string} string  "Song added successfully"
+// @Failure      400   {string} string  "Bad request"
+// @Failure      500   {string} string  "Internal server error"
+// @Router       /songs [post]
+func AddSongHandler(w http.ResponseWriter, r *http.Request) {
+	SongsHandler(w, r)
+}
+
+// @Summary      Update song data
+// @Description  Update song information in the database.
+// @Tags         songs
+// @Accept       json
+// @Produce      json
+// @Param        song       body    SongData    true  "Song data to update"
+// @Success      200       {string} string  "Song updated"
+// @Failure      400       {string} string  "Bad request"
+// @Failure      404       {string} string  "Song not found"
+// @Failure      500       {string} string  "Internal server error"
+// @Router       /songs [patch]
+func UpdateSongHandler(w http.ResponseWriter, r *http.Request) {
+	SongsHandler(w, r)
+}
+
+// @Summary      Delete a song
+// @Description  Delete a song from the database.
+// @Tags         songs
+// @Accept       json
+// @Produce      json
+// @Param        song   query    string  true   "Song name"
+// @Param        group  query    string  true   "Group name"
+// @Success      200    {string} string  "Song deleted"
+// @Failure      400    {string} string  "Bad request"
+// @Failure      404    {string} string  "Song not found"
+// @Failure      500    {string} string  "Internal server error"
+// @Router       /songs [delete]
+func DeleteSongHandler(w http.ResponseWriter, r *http.Request) {
+	SongsHandler(w, r)
+}
+
+// @Summary      Get song lyrics
+// @Description  Get the lyrics of a song by its name and group.
+// @Tags         text
+// @Accept       json
+// @Produce      json
+// @Param        song   query    string  true   "Song name"
+// @Param        group  query    string  true   "Group name"
+// @Param        verse  query    int     false  "Verse number"
+// @Success      200    {string} string  "Song lyrics"
+// @Failure      400    {string} string  "Bad request"
+// @Failure      404    {string} string  "Song not found"
+// @Failure      500    {string} string  "Internal server error"
+// @Router       /text [get]
+func GetSongTextHandler(w http.ResponseWriter, r *http.Request) {
+	SongsHandler(w, r)
 }
