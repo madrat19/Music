@@ -15,7 +15,7 @@ docker compose up --build -d
 
 ## Конфигурация
 * Данные для конфигурации хранятся в файле .env 
-* Среди них данные для подключения к БД, хост приложения и адрес API для получаения данных о музыке
+* Среди них данные для подключения к БД, хост приложения, уровень логирования и адрес API для получаения данных о музыке
 * Всё переменные, кроме MUSICINFO можно оставить неизменными
 
 ## Music info API
@@ -29,6 +29,13 @@ docker compose up --build -d
 
 
 ## Логирование
+Приложение поддеживает 3 уровня логирования
+* fatal: только критические ошибки
+* error: любые ошибки
+* info: наиболее полная информация
+
+Настроить уровень можно выставив соответсвующее значение для переменной LOGLEVEL в файле .env
+
 Все логи сохраняются в файле app.log, получить к нему доступ можно следующим образом:
 ```bash
 docker exec -it --user=root app /bin/sh
@@ -47,7 +54,7 @@ apk --no-cache add curl
 
 Добавяем новую песню:
 ```bash
-curl -X POST http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead"}'
+curl -X POST http://localhost:8080/songs --url-query song=Roads --url-query group=Portishead
 ```
 
 Получаем список песен:
