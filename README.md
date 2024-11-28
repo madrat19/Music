@@ -48,6 +48,9 @@ docker exec -it --user=root app /bin/sh
 cat app.log
 ```
 ## Тестирование 
+Тестировать функционал можно с помощью Swagger UI или шаблонов curl-запросов ниже
+
+
 При тестировании изнутри контейнера необходимо будет установить в него curl:
 ```bash
 docker exec -it --user=root app /bin/sh
