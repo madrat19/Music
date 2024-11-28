@@ -54,7 +54,7 @@ apk --no-cache add curl
 
 Добавяем новую песню:
 ```bash
-curl -X POST http://localhost:8080/songs -H "Content-Type: application/json; ; charset=utf-8" -d '{"song": "Roads", "group": "Portishead"}'
+curl -X POST http://localhost:8080/songs --url-query song=Roads --url-query group=Portishead
 ```
 
 Получаем список песен:
